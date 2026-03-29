@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAMB SUCCESS ACADEMY - CBT Portal</title>
+    <style>
+        :root { --primary: #0056b3; --secondary: #28a745; --danger: #dc3545; --bg: #f4f7f6; --text: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        button { cursor: pointer; padding: 10px 20px; border: none; border-radius: 5px; background: var(--primary); color: white; font-weight: bold; transition: 0.3s; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-top: 30px; }
+        .subjects-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        
+        .exam-header { display: flex; justify-content: space-between; background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; border-left: 5px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .timer { font-size: 1.4em; font-weight: bold; color: var(--danger); }
+        
+        .subject-tabs { display: flex; gap: 5px; margin-bottom: 0; overflow-x: auto; }
+        .tab { padding: 12px 25px; background: #e9ecef; color: #555; border-radius: 8px 8px 0 0; border: 1px solid #dee2e6; border-bottom: none; }
+        .tab.active { background: white; color: var(--primary); border-top: 3px solid var(--primary); font-weight: bold; }
+        
+        .exam-main { display: grid; grid-template-columns: 3fr 1fr; gap: 20px; align-items: start; }
+        .question-area { background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); min-height: 350px; }
+        .options { display: grid; gap: 12px; margin: 25px 0; }
+        .option { padding: 15px; border: 2px solid #edf2f7; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 1.1em; }
+        .option:hover { background: #f7fafc; border-color: #cbd5e0; }
+        .option.selected { background: #ebf8ff; border-color: var(--primary); color: var(--primary); font-weight: bold; }
+        
+        .grid-area { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .grid-btn { height: 35px; display: flex; align-items: center; justify-content: center; border: 1px solid #cbd5e0; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+        .grid-btn.answered { background: var(--secondary); color: white; border-color: var(--secondary); }
+        .grid-btn.active { border: 2px solid var(--primary); box-shadow: 0 0 5px rgba(0,86,179,0.3); }
+
+        #calculator { position: fixed; bottom: 30px; right: 30px; background: #2d3748; padding: 15px; border-radius: 12px; width: 220px; z-index: 1000; color: white; }
+        #calc-display { width: 100%; height: 45px; margin-bottom: 10px; text-align: right; font-size: 1.3em; padding: 10px; border-radius: 5px; border: none; background: #edf2f7; color: #1a202c; }
+        .calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .calc-btn { padding: 12px; background: #4a5568; border: none; color: white; border-radius: 4px; font-weight: bold; }
+        .calc-btn.op { background: #ed8936; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+        th { background: var(--primary); color: white; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>JAMB SUCCESS ACADEMY</h2>
+    <button id="admin-login-btn" onclick="showAdmin()">Admin Portal</button>
+</header>
+
+<div class="container">
+    <div id="page-register" class="card">
+        <h3 style="color: var(--primary);">Student Registration</h3>
+        <p>Complete your profile to start. Use of English is compulsory for all candidates.</p>
+        <div style="margin-bottom: 20px;">
+            <label><b>Full Name:</b></label><br>
+            <input type="text" id="student-name" placeholder="Enter Surname Firstname" style="width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div>
+            <label><b>Select 3 Additional Subjects:</b></label>
+            <div class="subjects-grid">
+                <div><input type="checkbox" checked disabled> Use of English</div>
+                <div><input type="checkbox" class="subject-cb" value="Mathematics"> Mathematics</div>
+                <div><input type="checkbox" class="subject-cb" value="Physics"> Physics</div>
+                <div><input type="checkbox" class="subject-cb" value="Chemistry"> Chemistry</div>
+                <div><input type="checkbox" class="subject-cb" value="Biology"> Biology</div>
+            </div>
+        </div>
+        <button onclick="startExam()" id="start-btn" style="width: 100%; padding: 15px; font-size: 1.1em;" disabled>Proceed to Examination</button>
+    </div>
+
+    <div id="page-exam" class="hidden">
+        <div class="exam-header">
+            <div>Candidate: <strong id="cand-name-display" style="color: var(--primary);"></strong></div>
+            <div class="timer">? <span id="time-display">02:00:00</span></div>
+        </div>
+        
+        <div class="subject-tabs" id="subject-tabs"></div>
+
+        <div class="exam-main">
+            <div class="question-container">
+                <div class="question-area">
+                    <h3 id="q-label" style="color: #4a5568; margin-top: 0;">Question 1</h3>
+                    <p id="q-text" style="font-size: 1.25em; line-height: 1.6;"></p>
+                    <div class="options" id="opt-list"></div>
+                    
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <button onclick="prevQ()" style="background: #718096;">? Previous</button>
+                        <button onclick="toggleCalc()" style="background: #4a5568;">? Calculator</button>
+                        <button onclick="nextQ()">Next ?</button>
+                    </div>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button onclick="submitExam()" style="background: var(--danger); padding: 12px 30px;">FINISH & SUBMIT</button>
+                </div>
+            </div>
+            
+            <div class="grid-area">
+                <h4 style="margin: 0 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">Progress</h4>
+                <div class="btn-grid" id="q-grid"></div>
+                <p style="font-size: 0.8em; margin-top: 15px; color: #718096;">Green: Answered<br>White: Unanswered</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="calculator" class="hidden">
+        <input type="text" id="calc-display" disabled value="0">
+        <div class="calc-buttons">
+            <button class="calc-btn" onclick="cInput('7')">7</button>
+            <button class="calc-btn" onclick="cInput('8')">8</button>
+            <button class="calc-btn" onclick="cInput('9')">9</button>
+            <button class="calc-btn op" onclick="cInput('/')">¯</button>
+            <button class="calc-btn" onclick="cInput('4')">4</button>
+            <button class="calc-btn" onclick="cInput('5')">5</button>
+            <button class="calc-btn" onclick="cInput('6')">6</button>
+            <button class="calc-btn op" onclick="cInput('*')">℅</button>
+            <button class="calc-btn" onclick="cInput('1')">1</button>
+            <button class="calc-btn" onclick="cInput('2')">2</button>
+            <button class="calc-btn" onclick="cInput('3')">3</button>
+            <button class="calc-btn op" onclick="cInput('-')">-</button>
+            <button class="calc-btn" style="background: var(--danger);" onclick="cInput('C')">C</button>
+            <button class="calc-btn" onclick="cInput('0')">0</button>
+            <button class="calc-btn" style="background: var(--secondary);" onclick="cInput('=')">=</button>
+            <button class="calc-btn op" onclick="cInput('+')">+</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="card hidden" style="text-align: center;">
+        <h2 style="color: var(--secondary);">Examination Result Summary</h2>
+        <div id="res-score" style="font-size: 4em; font-weight: 800; color: var(--primary); margin: 15px 0;">000</div>
+        <div id="res-breakdown" style="font-size: 1.2em; line-height: 2; margin-bottom: 30px;"></div>
+        <button onclick="location.reload()">Return to Landing Page</button>
+    </div>
+
+    <div id="page-admin" class="card hidden">
+        <div style="display: flex; justify-content: space-between;">
+            <h3>Result Database</h3>
+            <button onclick="location.reload()" style="background: #718096;">Back</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>English</th>
+                    <th>Sub 2</th>
+                    <th>Sub 3</th>
+                    <th>Sub 4</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="admin-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const db = {
+        "Chemistry": [
+            { q: "The number of neutrons in an atom with mass number 27 and atomic number 13 is:", options: ["A. 13", "B. 14", "C. 27", "D. 40"], ans: 1 },
+            { q: "The electronic configuration of sodium (Z = 11) is:", options: ["A. 2, 8, 1", "B. 2, 7, 2", "C. 2, 8, 2", "D. 2, 6, 3"], ans: 0 },
+            { q: "Which statement best explains diffusion?", options: ["A. Movement from low to high", "B. Movement from high to low", "C. Movement of solids only", "D. Movement caused by heat only"], ans: 1 },
+            { q: "Which of the following decreases across a period?", options: ["A. Ionization energy", "B. Electronegativity", "C. Atomic radius", "D. Electron affinity"], ans: 2 },
+            { q: "Which method can be used to separate ethanol from water?", options: ["A. Filtration", "B. Sublimation", "C. Fractional distillation", "D. Decantation"], ans: 2 },
+            { q: "Which law states that gases combine in simple whole number ratios by volume?", options: ["A. Boyle＊s law", "B. Charles＊ law", "C. Avogadro＊s law", "D. Gay-Lussac＊s law"], ans: 3 },
+            { q: "If the pressure of a gas is doubled at constant temperature, the volume will:", options: ["A. Double", "B. Remain constant", "C. Be halved", "D. Triple"], ans: 2 },
+            { q: "Which type of bond is formed between magnesium and oxygen?", options: ["A. Covalent", "B. Ionic", "C. Metallic", "D. Hydrogen"], ans: 1 },
+            { q: "Which of the following contains a covalent bond?", options: ["A. KCl", "B. Na?O", "C. H?O", "D. CaCl?"], ans: 2 },
+            { q: "Which process involves loss of electrons?", options: ["A. Reduction", "B. Oxidation", "C. Neutralization", "D. Hydrolysis"], ans: 1 },
+            { q: "During electrolysis, oxidation occurs at the:", options: ["A. Cathode", "B. Anode", "C. Electrolyte", "D. Salt bridge"], ans: 1 },
+            { q: "Which of the following is a weak acid?", options: ["A. HCl", "B. HNO?", "C. H?SO?", "D. CH?COOH"], ans: 3 },
+            { q: "Which subatomic particle determines chemical properties?", options: ["A. Proton", "B. Neutron", "C. Electron", "D. Nucleus"], ans: 2 },
+            { q: "Elements in the same period have the same:", options: ["A. Valence electrons", "B. Number of shells", "C. Atomic number", "D. Reactivity"], ans: 1 },
+            { q: "Method to separate a solid dissolved in a liquid:", options: ["A. Filtration", "B. Evaporation", "C. Decantation", "D. Magnetic separation"], ans: 1 },
+            { q: "Increasing temp at constant pressure causes gas to:", options: ["A. Move slower", "B. Decrease in number", "C. Move faster", "D. Stop moving"], ans: 2 },
+            { q: "Which substance conducts electricity in solid state?", options: ["A. Sodium chloride", "B. Copper", "C. Sugar", "D. Sulphur"], ans: 1 },
+            { q: "In Zn + Cu?? ↙ Zn?? + Cu, Zinc is:", options: ["A. Reduced", "B. Oxidized", "C. Neutral", "D. Catalyst"], ans: 1 },
+            { q: "During electrolysis, anions move towards the:", options: ["A. Cathode", "B. Anode", "C. Electrolyte", "D. External circuit"], ans: 1 },
+            { q: "A base that is soluble in water is called:", options: ["A. Acid", "B. Salt", "C. Alkali", "D. Oxide"], ans: 2 },
+            { q: "Which of the following is an alkene?", options: ["A. CH?", "B. C?H?", "C. C?H?", "D. C?H?"], ans: 2 },
+            { q: "Product of complete combustion of propane is:", options: ["A. CO + H?O", "B. CO? + H?O", "C. C + H?O", "D. CH? + O?"], ans: 1 },
+            { q: "Cracking of C?H?? produces:", options: ["A. C?H?? + C?H?", "B. C?H?? + O?", "C. CH? + CO?", "D. C?H?? + H?"], ans: 0 },
+            { q: "Which of these shows geometric isomerism?", options: ["A. CH?每CH=CH每CH?", "B. CH?", "C. C?H?", "D. C?H?"], ans: 0 },
+            { q: "Identify the alkyne:", options: ["A. C?H?", "B. C?H?", "C. C?H?", "D. CH?"], ans: 0 },
+            { q: "The functional group of alkynes is:", options: ["A. 每OH", "B. 每COOH", "C. 每C√C每", "D. 每CHO"], ans: 2 },
+            { q: "CH?每CHCl每CH? shows which isomerism?", options: ["A. Chain", "B. Position", "C. Geometrical", "D. Optical"], ans: 1 },
+            { q: "Which compound exhibits optical isomerism?", options: ["A. CH?每CH(OH)每CH?", "B. CH?每CHBr每CH?Cl", "C. CH?每CH?每CH?", "D. CH?=CH?"], ans: 1 },
+            { q: "CH?CH?OH belongs to:", options: ["A. Alcohols", "B. Ketones", "C. Aldehydes", "D. Acids"], ans: 0 },
+            { q: "Oxidation of CH?CH?OH produces:", options: ["A. CH?CH?OH", "B. CH?CHO", "C. CH?COOH", "D. CH?"], ans: 1 },
+            { q: "Which compound is an aldehyde?", options: ["A. CH?每CHO", "B. CH?每CO每CH?", "C. CH?每COOH", "D. CH?每OH"], ans: 0 },
+            { q: "Which of these is a carboxylic acid?", options: ["A. CH?CH?COOH", "B. CH?CH?OH", "C. CH?CHO", "D. CH?COCH?"], ans: 0 },
+            { q: "The functional group of esters is:", options: ["A. 每COOH", "B. 每OH", "C. 每COO每", "D. 每CO每"], ans: 2 },
+            { q: "CH?每O每CH? is named:", options: ["A. Methoxymethane", "B. Ethoxyethane", "C. Methyl ethanoate", "D. Methanol"], ans: 0 },
+            { q: "Hydrolysis of an ester produces:", options: ["A. Acid + Alcohol", "B. Ketone + Alcohol", "C. Alkane + Water", "D. Amine + Water"], ans: 0 },
+            { q: "CH?NH? is a:", options: ["A. Primary amine", "B. Secondary amine", "C. Tertiary amine", "D. Alcohol"], ans: 0 },
+            { q: "Amines are basic because:", options: ["A. Donate H?", "B. They accept H?", "C. Produce CO?", "D. Oxygen"], ans: 1 },
+            { q: "The monomer of polyethene is:", options: ["A. Ethane", "B. Ethene", "C. Ethanol", "D. Ethanoic acid"], ans: 1 },
+            { q: "Nylon is an example of a:", options: ["A. Addition polymer", "B. Condensation polymer", "C. Natural", "D. Inorganic"], ans: 1 },
+            { q: "Which polymerization releases a small molecule like water?", options: ["A. Addition", "B. Condensation", "C. Free radical", "D. None"], ans: 1 }
+        ],
+        "Mathematics": [
+            { q: "If 3^(x+1) = 81, find x.", options: ["A. 2", "B. 3", "C. 4", "D. 5"], ans: 1 },
+            { q: "Price +20% then -30%. Net change is:", options: ["A. 4% increase", "B. 4% decrease", "C. 10% decrease", "D. 10% increase"], ans: 1 },
+            { q: "Solve: 2^(2x) * 4^(1-x) = 8", options: ["A. -1", "B. 0", "C. 1", "D. 2"], ans: 2 },
+            { q: "Money doubles in 5 years (Simple Interest). Rate:", options: ["A. 10%", "B. 20%", "C. 25%", "D. 15%"], ans: 1 },
+            { q: "Round 0.007845 to 3 sig figures.", options: ["A. 0.00784", "B. 0.00785", "C. 0.0078", "D. 0.0079"], ans: 1 },
+            { q: "Simplify: (﹟50 + ﹟18)/﹟2", options: ["A. 7", "B. 8", "C. 9", "D. 10"], ans: 2 },
+            { q: "Solve for x: log2(x-1) + log2(x+1) = 3", options: ["A. 3", "B. 2", "C. 1", "D. 4"], ans: 0 },
+            { q: "If 3/4 of a number is 15, find 150% of the number.", options: ["A. 18.75", "B. 20", "C. 22.5", "D. 25"], ans: 2 },
+            { q: "Solve: (3x-2)/4 > 5", options: ["A. x>6", "B. x>5", "C. x>7", "D. x>8"], ans: 0 },
+            { q: "Class of 50: 30 Maths, 25 English, 10 both. Neither?", options: ["A. 5", "B. 10", "C. 15", "D. 20"], ans: 0 },
+            { q: "Solve: 5 - 2x ≒ 3x + 10", options: ["A. x ≡ -1", "B. x ≒ 1", "C. x ≡ -3", "D. x ≒ 3"], ans: 0 },
+            { q: "Factorize: x^2 + 5x + 6", options: ["A. (x+2)(x+3)", "B. (x-2)(x+3)", "C. (x+1)(x+6)", "D. (x+2)(x+4)"], ans: 0 },
+            { q: "AP 5th term=20, 8th term=32. Sum of first 10?", options: ["A. 220", "B. 210", "C. 200", "D. 230"], ans: 1 },
+            { q: "Solve: {x + y = 7, 2x - y = 4}", options: ["A. x=3, y=4", "B. x=4, y=3", "C. x=2, y=5", "D. x=5, y=2"], ans: 0 },
+            { q: "Rationalize: 3/(2+﹟3)", options: ["A. 2-﹟3", "B. 2+﹟3", "C. 2﹟3-3", "D. 2﹟3+3"], ans: 0 },
+            { q: "y ≦ x?/z. y=18, x=3, z=2. Find y when x=6, z=3.", options: ["A. 24", "B. 36", "C. 54", "D. 72"], ans: 1 },
+            { q: "Solve: x^2 - 5x + 6 = 0", options: ["A. 2,3", "B. -2,-3", "C. 1,6", "D. -1,-6"], ans: 0 },
+            { q: "Simplify: (2x + 3)(x - 5) + 10", options: ["A. 2x^2 - 7x - 5", "B. 2x^2 - 7x - 5", "C. 2x^2 - 7x + 5", "D. 2x^2 + 7x - 5"], ans: 2 },
+            { q: "Solve: 2^(x+1) = 16", options: ["A. 3", "B. 4", "C. 2", "D. 5"], ans: 1 },
+            { q: "0.0003456 in standard form to 2 sig figures.", options: ["A. 3.46 ℅ 10??", "B. 3.45 ℅ 10??", "C. 3.5 ℅ 10??", "D. 3.4 ℅ 10??"], ans: 2 },
+            { q: "Length 12.34cm vs Actual 12.36cm. % error?", options: ["A. 0.16%", "B. 0.18%", "C. 0.20%", "D. 0.25%"], ans: 0 },
+            { q: "Sum first 5 GP terms = 121, a=3. Ratio r?", options: ["A. 2", "B. 3", "C. 4", "D. 5"], ans: 1 },
+            { q: "y ≦ 1/x, y=6 when x=4. Find y when x=12.", options: ["A. 2", "B. 3", "C. 4", "D. 6"], ans: 0 },
+            { q: "Solve: {3x + 2y = 7, 4x^2 - y = 5}", options: ["A. x=1, y=4", "B. x=2, y=1", "C. x=-1, y=1", "D. x=1, y=-1"], ans: 0 },
+            { q: "If x^2 + kx + 16 = 0 has equal roots, k?", options: ["A. 8", "B. -8", "C. 4", "D. -4"], ans: 1 },
+            { q: "Solve: 3^(2x) = 81", options: ["A. 2", "B. 1", "C. 3", "D. 4"], ans: 2 },
+            { q: "Solve: 5^(x-1) = 25", options: ["A. 1", "B. 2", "C. 3", "D. 4"], ans: 1 },
+            { q: "Simplify: (﹟32 - ﹟8)/﹟2", options: ["A. 4", "B. 6", "C. 8", "D. 10"], ans: 1 },
+            { q: "Solve: log3(x+2) - log3(x-1) = 2", options: ["A. 6", "B. 7", "C. 8", "D. 9"], ans: 2 },
+            { q: "Factorize: x^2 - 7x + 12", options: ["A. (x-3)(x-4)", "B. (x+3)(x-4)", "C. (x-3)(x+4)", "D. (x+3)(x+4)"], ans: 0 },
+            { q: "Solve: 7x - 5 = 3x + 11", options: ["A. 3", "B. 4", "C. 5", "D. 6"], ans: 2 },
+            { q: "Solve: 4x^2 - 12x + 9 = 0", options: ["A. 1.5", "B. 2", "C. 3", "D. 2.5"], ans: 0 },
+            { q: "Inequality: 2x + 5 ≡ 11", options: ["A. x ≡ 2", "B. x ≡ 3", "C. x ≡ 4", "D. x ≡ 5"], ans: 1 },
+            { q: "AP a=5, d=3. Find 10th term.", options: ["A. 32", "B. 35", "C. 29", "D. 30"], ans: 1 },
+            { q: "Sum of first n natural numbers = 210. Find n.", options: ["A. 20", "B. 21", "C. 14", "D. 15"], ans: 1 },
+            { q: "Solve: (2x+3)/5 = 7", options: ["A. 14", "B. 16", "C. 17.5", "D. 18"], ans: 1 },
+            { q: "Decrease 25% then Increase 40%. Net change:", options: ["A. 5% inc", "B. 5% dec", "C. 10% inc", "D. 10% dec"], ans: 0 },
+            { q: "Roots of x^2 - 9x + 20 = 0?", options: ["A. 4,5", "B. 5,6", "C. 3,6", "D. 2,5"], ans: 0 },
+            { q: "AP 3rd term=7, 6th term=16. 10th term?", options: ["A. 28", "B. 30", "C. 31", "D. 32"], ans: 1 },
+            { q: "Simplify: (2﹟3 + ﹟12)/﹟3", options: ["A. 4", "B. 5", "C. 6", "D. 7"], ans: 2 }
+        ],
+        "Physics": [
+            { q: "The SI unit of force is:", options: ["A. Joule", "B. Newton", "C. Watt", "D. Pascal"], ans: 1 },
+            { q: "Which of the following is a scalar quantity?", options: ["A. Velocity", "B. Force", "C. Acceleration", "D. Speed"], ans: 3 },
+            { q: "A body moves with constant velocity. This means:", options: ["A. Accel=0", "B. Force inc", "C. Mass changes", "D. Speed=0"], ans: 0 },
+            { q: "The dimension of velocity is:", options: ["A. LT??", "B. LT??", "C. L?T??", "D. T??"], ans: 0 },
+            { q: "Slope of a velocity-time graph represents:", options: ["A. Distance", "B. Speed", "C. Acceleration", "D. Displacement"], ans: 2 },
+            { q: "Force of 10 N on mass of 2 kg. Acceleration is:", options: ["A. 2 m/s?", "B. 5 m/s?", "C. 10 m/s?", "D. 20 m/s?"], ans: 1 },
+            { q: "Which law explains equal and opposite reaction?", options: ["A. 1st law", "B. 2nd law", "C. 3rd law", "D. Gravity"], ans: 2 },
+            { q: "Work is done when:", options: ["A. No movement", "B. Displacement in force dir", "C. Rest", "D. Const vel"], ans: 1 },
+            { q: "Unit of power is:", options: ["A. Joule", "B. Newton", "C. Watt", "D. Meter"], ans: 2 },
+            { q: "Kinetic energy depends on:", options: ["A. Mass only", "B. Vel only", "C. Mass/Vel", "D. Distance"], ans: 2 },
+            { q: "Which of the following is a vector?", options: ["A. Distance", "B. Energy", "C. Displacement", "D. Power"], ans: 2 },
+            { q: "Gravity on Earth is approximately:", options: ["A. 9.8 m/s", "B. 9.8 m/s?", "C. 10 m/s", "D. 10 m"], ans: 1 },
+            { q: "The unit of momentum is:", options: ["A. kg m/s", "B. kg m/s?", "C. N/m", "D. J/s"], ans: 0 },
+            { q: "Vel from 10 to 20 m/s in 5s. Accel is:", options: ["A. 2 m/s?", "B. 4 m/s?", "C. 5 m/s?", "D. 10 m/s?"], ans: 0 },
+            { q: "Potential energy is due to:", options: ["A. Motion", "B. Position", "C. Temp", "D. Pressure"], ans: 1 },
+            { q: "Which instrument measures mass?", options: ["A. Spring balance", "B. Meter rule", "C. Beam balance", "D. Thermometer"], ans: 2 },
+            { q: "If no external force acts, a body will:", options: ["A. Stop", "B. Accelerate", "C. Rest/Move uniformly", "D. Change dir"], ans: 2 },
+            { q: "Area under velocity-time graph gives:", options: ["A. Acceleration", "B. Distance", "C. Speed", "D. Force"], ans: 1 },
+            { q: "Which is not a unit of energy?", options: ["A. Joule", "B. kWh", "C. Watt", "D. Calorie"], ans: 2 },
+            { q: "Force that opposes motion is called:", options: ["A. Gravity", "B. Friction", "C. Tension", "D. Reaction"], ans: 1 },
+            { q: "The product of mass and velocity is:", options: ["A. Force", "B. Work", "C. Momentum", "D. Energy"], ans: 2 },
+            { q: "Force of 20 N on 5 kg mass. Accel is:", options: ["A. 2 m/s?", "B. 4 m/s?", "C. 5 m/s?", "D. 10 m/s?"], ans: 1 },
+            { q: "Which of the following is a unit of power?", options: ["A. J", "B. W", "C. N", "D. kg"], ans: 1 },
+            { q: "Gravitational force depends on:", options: ["A. Color", "B. Masses and distance", "C. Temp", "D. Shape"], ans: 1 },
+            { q: "A body falls freely. Its velocity:", options: ["A. Decreases", "B. Constant", "C. Increases", "D. Zero"], ans: 2 },
+            { q: "Resultant of two equal opposite forces is:", options: ["A. Maximum", "B. Minimum", "C. Zero", "D. Constant"], ans: 2 },
+            { q: "Efficiency is defined as:", options: ["A. Out/In", "B. In/Out", "C. W x T", "D. F x D"], ans: 0 },
+            { q: "The unit of work is:", options: ["A. Watt", "B. Joule", "C. Newton", "D. Pascal"], ans: 1 },
+            { q: "Conserved in an isolated system:", options: ["A. Energy", "B. Temp", "C. Pressure", "D. Volume"], ans: 0 },
+            { q: "Projectile at max height has:", options: ["A. Max vel", "B. Zero vertical vel", "C. Max accel", "D. Zero horiz vel"], ans: 1 },
+            { q: "The SI unit of time is:", options: ["A. Minute", "B. Hour", "C. Second", "D. Day"], ans: 2 },
+            { q: "A vector has:", options: ["A. Mag only", "B. Dir only", "C. Mag/Dir", "D. Neither"], ans: 2 },
+            { q: "Power is defined as:", options: ["A. F x D", "B. Work/Time", "C. M x A", "D. E x T"], ans: 1 },
+            { q: "Centre of gravity is where:", options: ["A. Mass=0", "B. Weight acts", "C. Force applied", "D. Motion starts"], ans: 1 },
+            { q: "Which law explains inertia?", options: ["A. First law", "B. Second law", "C. Third law", "D. Gravity"], ans: 0 },
+            { q: "Stone tied to string whirled in circle:", options: ["A. Linear", "B. Random", "C. Circular", "D. Oscillatory"], ans: 2 },
+            { q: "Force keeping planets in orbit is:", options: ["A. Magnetic", "B. Frictional", "C. Gravitational", "D. Electric"], ans: 2 },
+            { q: "Equilibrium occurs when:", options: ["A. Forces unequal", "B. Resultant force=0", "C. Motion inc", "D. Energy lost"], ans: 1 },
+            { q: "Conserved in collisions:", options: ["A. Speed", "B. Momentum", "C. Velocity", "D. Distance"], ans: 1 },
+            { q: "Machine with 80% efficiency means:", options: ["A. 80% lost", "B. 20% useful", "C. 80% useful", "D. 100% out"], ans: 2 }
+        ],
+        "Use of English": [
+            { q: "The region is known for its ABUNDANT rainfall. (Opposite)", options: ["A. Heavy", "B. Scarce", "C. Excessive", "D. Frequent"], ans: 1 },
+            { q: "Identify the verb: The baby cried loudly.", options: ["A. cried", "B. loudly", "C. baby", "D. The"], ans: 0 },
+            { q: "Choose correct sentence:", options: ["A. Me and my friend...", "B. My friend and I...", "C. I and my friend...", "D. Me went with..."], ans: 1 },
+            { q: "Identify preposition: She put the book ON the table.", options: ["A. book", "B. on", "C. table", "D. put"], ans: 1 },
+            { q: "Identify relative pronoun: The man WHO called is my uncle.", options: ["A. man", "B. who", "C. called", "D. uncle"], ans: 1 },
+            { q: "Synonym of INTELLIGENT:", options: ["A. Clever", "B. Stupid", "C. Foolish", "D. Dull"], ans: 0 },
+            { q: "Identify collective noun:", options: ["A. herd", "B. boy", "C. apple", "D. rice"], ans: 0 },
+            { q: "UNDER THE WEATHER means:", options: ["A. Angry", "B. Sick", "C. Happy", "D. Confused"], ans: 1 },
+            { q: "Identify auxiliary verb: She HAS completed her task.", options: ["A. has", "B. completed", "C. homework", "D. She"], ans: 0 },
+            { q: "Identify gerund: SWIMMING is good for health.", options: ["A. Swimming", "B. is", "C. health", "D. good"], ans: 0 },
+            { q: "Past tense of go:", options: ["A. go", "B. went", "C. gone", "D. goes"], ans: 1 },
+            { q: "Identify demonstrative: THESE are mine.", options: ["A. These", "B. mine", "C. are", "D. none"], ans: 0 },
+            { q: "Subject-Verb Agreement:", options: ["A. Everyone are ready", "B. Everyone is ready"], ans: 1 },
+            { q: "Identify interjection: ALAS! He failed.", options: ["A. Alas!", "B. He", "C. failed", "D. exam"], ans: 0 },
+            { q: "Synonym of FAST:", options: ["A. slow", "B. quick", "C. weak", "D. lazy"], ans: 1 },
+            { q: "Identify transitive verb: He wrote a letter.", options: ["A. wrote", "B. He", "C. letter", "D. a"], ans: 0 },
+            { q: "Plural of child:", options: ["A. childs", "B. children", "C. childrens", "D. childes"], ans: 1 },
+            { q: "Identify dependent clause: I will call you WHEN I ARRIVE.", options: ["A. I will call", "B. when I arrive", "C. I", "D. call"], ans: 1 },
+            { q: "Opposite of ANCIENT:", options: ["A. Old", "B. Modern", "C. Historic", "D. Vintage"], ans: 1 },
+            { q: "Reflexive pronoun: She taught HERSELF to cook.", options: ["A. She", "B. herself", "C. cook", "D. taught"], ans: 1 },
+            { q: "Compound noun:", options: ["A. mother-in-law", "B. beautiful girl", "C. runs fast", "D. very quickly"], ans: 0 },
+            { q: "Synonym of BRAVE:", options: ["A. Cowardly", "B. Courageous", "C. Timid", "D. Lazy"], ans: 1 },
+            { q: "Independent clause: Although it rained, WE PLAYED FOOTBALL.", options: ["A. Although it rained", "B. we played football", "C. it rained", "D. we"], ans: 1 },
+            { q: "Possessive form: Bag belongs to John ->", options: ["A. John＊s", "B. Johns", "C. John", "D. Johnes"], ans: 0 },
+            { q: "SPILLED THE BEANS means:", options: ["A. Dropped items", "B. Told secret", "C. Cooked", "D. Made mess"], ans: 1 },
+            { q: "Opposite of FRIENDLY:", options: ["A. Rude", "B. Polite", "C. Kind", "D. Nice"], ans: 0 },
+            { q: "Finite verb: She RUNS every morning.", options: ["A. runs", "B. every", "C. morning", "D. she"], ans: 0 },
+            { q: "Modal verb: You MUST finish.", options: ["A. must", "B. finish", "C. homework", "D. You"], ans: 0 },
+            { q: "Correct sentence:", options: ["A. He can to swim", "B. He can swim fast"], ans: 1 },
+            { q: "Closed compound noun:", options: ["A. toothpaste", "B. school bus", "C. mother-in-law", "D. post office"], ans: 0 },
+            { q: "SWEAT LIKE A PIG means:", options: ["A. Feeling hot", "B. Guilty/Nervous", "C. Sick", "D. Run"], ans: 1 },
+            { q: "Object pronoun: She gave HIM a gift.", options: ["A. She", "B. him", "C. gift", "D. gave"], ans: 1 },
+            { q: "Synonym of INTELLIGENT (repeat):", options: ["A. Clever", "B. Stupid", "C. Foolish", "D. Dull"], ans: 0 },
+            { q: "Open compound noun:", options: ["A. school bus", "B. toothpaste", "C. bedroom", "D. notebook"], ans: 0 },
+            { q: "Plural possessive: The girls' hostel is big.", options: ["A. girls", "B. girls＊", "C. hostel", "D. big"], ans: 1 },
+            { q: "Hyphenated compound noun:", options: ["A. mother-in-law", "B. toothpaste", "C. classroom", "D. football"], ans: 0 },
+            { q: "Opposite of DIFFICULT:", options: ["A. Easy", "B. Hard", "C. Simple", "D. Light"], ans: 0 },
+            { q: "Indefinite pronoun: SOMEONE is at the door.", options: ["A. Someone", "B. door", "C. is", "D. none"], ans: 0 },
+            { q: "BREAK A LEG means:", options: ["A. Hospital", "B. Good luck", "C. Careful", "D. Run fast"], ans: 1 },
+            { q: "Plural of tooth:", options: ["A. tooths", "B. teeth", "C. toothes", "D. toothes"], ans: 1 },
+            { q: "Relative pronoun: The woman WHOM I met.", options: ["A. whom", "B. I", "C. met", "D. woman"], ans: 0 },
+            { q: "Pronoun: THEY are coming.", options: ["A. They", "B. are", "C. coming", "D. none"], ans: 0 },
+            { q: "Adjective: He wore a BEAUTIFUL dress.", options: ["A. beautiful", "B. dress", "C. wore", "D. he"], ans: 0 },
+            { q: "HEART OF STONE means:", options: ["A. Strong", "B. Cruel", "C. Healthy", "D. Rich"], ans: 1 },
+            { q: "Non-finite verb: TO EAT is necessary.", options: ["A. To eat", "B. is", "C. necessary", "D. survival"], ans: 0 },
+            { q: "Distributive pronoun: EACH of the students.", options: ["A. Each", "B. students", "C. is", "D. ready"], ans: 0 },
+            { q: "Transitive verb: He KILLED a snake.", options: ["A. killed", "B. He", "C. snake", "D. a"], ans: 0 },
+            { q: "Antonym of INCREASE:", options: ["A. Grow", "B. Rise", "C. Decrease", "D. Expand"], ans: 2 },
+            { q: "BEAT AROUND THE BUSH means:", options: ["A. Avoid topic", "B. Hit bush", "C. Speak softly", "D. Be honest"], ans: 0 },
+            { q: "Synonym of FAST (repeat):", options: ["A. Quick", "B. Slow", "C. Lazy", "D. Weak"], ans: 0 },
+            { q: "Reflexive: I did it MYSELF.", options: ["A. I", "B. it", "C. myself", "D. did"], ans: 2 },
+            { q: "Plural of mother-in-law:", options: ["A. mother-in-laws", "B. mothers-in-law", "C. mothers-in-laws", "D. mother-in-lawes"], ans: 1 },
+            { q: "Father's house possessive:", options: ["A. my father＊s", "B. my fathers", "C. fathers", "D. father＊s"], ans: 0 },
+            { q: "Finite verb: He runs...", options: ["A. runs", "B. morning", "C. every", "D. He"], ans: 0 },
+            { q: "Irregular verb: She WENT to the market.", options: ["A. played", "B. walked", "C. went", "D. jumped"], ans: 2 },
+            { q: "Idiom meaning 'secret':", options: ["A. Spill the beans", "B. Kick the bucket", "C. Under the weather", "D. Break a leg"], ans: 0 },
+            { q: "Correct sentence (repeat):", options: ["A. He did went", "B. He went to school"], ans: 1 },
+            { q: "JUMPED FOR JOY means:", options: ["A. Literal jump", "B. Very happy", "C. Sad", "D. Angry"], ans: 1 },
+            { q: "Adjective: Food was DELICIOUS.", options: ["A. delicious", "B. food", "C. was", "D. very"], ans: 0 },
+            { q: "Opposite of GENEROUS:", options: ["A. Selfish", "B. Kind", "C. Caring", "D. Brave"], ans: 0 }
+        ],
+        "Biology": [
+            { q: "Water movement across semi-permeable membrane:", options: ["A. Osmosis", "B. Diffusion", "C. Active transport", "D. Filtration"], ans: 0 },
+            { q: "Humans are:", options: ["A. Herbivorous", "B. Carnivorous", "C. Omnivorous", "D. Insectivorous"], ans: 2 },
+            { q: "Enzyme breaking starch into maltose:", options: ["A. Lipase", "B. Amylase", "C. Pepsin", "D. Trypsin"], ans: 1 },
+            { q: "Binomial nomenclature was proposed by:", options: ["A. Charles Darwin", "B. Carolus Linnaeus", "C. Gregor Mendel", "D. Louis Pasteur"], ans: 1 },
+            { q: "Not a kingdom in five-kingdom classification:", options: ["A. Plantae", "B. Animalia", "C. Monera", "D. Virus"], ans: 3 },
+            { q: "Chromosomes are made up of:", options: ["A. DNA/RNA", "B. DNA/proteins", "C. RNA/proteins", "D. RNA"], ans: 1 },
+            { q: "Aerobic respiration takes place in:", options: ["A. Cytoplasm", "B. Mitochondria", "C. Ribosome", "D. Nucleus"], ans: 1 },
+            { q: "Functional unit of the kidney:", options: ["A. Neuron", "B. Nephron", "C. Nucleus", "D. Glomerulus"], ans: 1 },
+            { q: "Hormone stimulating growth:", options: ["A. Insulin", "B. Growth hormone", "C. Glucagon", "D. Cortisol"], ans: 1 },
+            { q: "Enzyme pepsin acts on:", options: ["A. Carbohydrates", "B. Lipids", "C. Proteins", "D. Nucleic acids"], ans: 2 },
+            { q: "Total permanent teeth in humans:", options: ["A. 28", "B. 30", "C. 32", "D. 36"], ans: 2 },
+            { q: "Teeth used for grinding food:", options: ["A. Incisors", "B. Canines", "C. Molars", "D. Wisdom teeth"], ans: 2 },
+            { q: "Thyroid gland secretes:", options: ["A. Adrenaline", "B. Thyroxine", "C. Glucagon", "D. Oxytocin"], ans: 1 },
+            { q: "Site of gaseous exchange in lungs:", options: ["A. Bronchi", "B. Alveoli", "C. Trachea", "D. Larynx"], ans: 1 },
+            { q: "Increase in size of an organism is:", options: ["A. Differentiation", "B. Growth", "C. Development", "D. Maturation"], ans: 1 },
+            { q: "Projections in small intestine:", options: ["A. Microvilli", "B. Cilia", "C. Flagella", "D. Fimbriae"], ans: 0 },
+            { q: "Powerhouse of the cell is:", options: ["A. Nucleus", "B. Mitochondrion", "C. Ribosome", "D. Lysosome"], ans: 1 },
+            { q: "Organelle responsible for protein synthesis:", options: ["A. Golgi", "B. Ribosome", "C. Lysosome", "D. Chloroplast"], ans: 1 },
+            { q: "Urea formed from breakdown of:", options: ["A. Carbs", "B. Proteins", "C. Lipids", "D. Vitamins"], ans: 1 },
+            { q: "Teeth adapted for tearing flesh:", options: ["A. Incisors", "B. Canines", "C. Premolars", "D. Molars"], ans: 1 },
+            { q: "Puberty is an example of:", options: ["A. Growth", "B. Development", "C. Reproduction", "D. Senescence"], ans: 1 },
+            { q: "Main excretory organ in humans:", options: ["A. Liver", "B. Kidney", "C. Lungs", "D. Skin"], ans: 1 },
+            { q: "Functional unit of kidney:", options: ["A. Neuron", "B. Nephron", "C. Glomerulus", "D. Ureter"], ans: 1 },
+            { q: "A nitrogenous waste:", options: ["A. Urea", "B. Glucose", "C. Fatty acid", "D. Salt"], ans: 0 },
+            { q: "Enzyme acting on starch in saliva:", options: ["A. Amylase", "B. Pepsin", "C. Lipase", "D. Trypsin"], ans: 0 },
+            { q: "Scientific name italicized because:", options: ["A. Importance", "B. Genus/Species", "C. Foreign", "D. Pronunciation"], ans: 1 },
+            { q: "Gland secreting adrenaline:", options: ["A. Thyroid", "B. Adrenal", "C. Pituitary", "D. Pancreas"], ans: 1 },
+            { q: "Teeth in 2-year-old child:", options: ["A. Permanent", "B. Deciduous", "C. Wisdom", "D. Incisors"], ans: 1 },
+            { q: "Human permanent dental formula:", options: ["A. 2.1.2.3/2.1.2.3", "B. 2.1.2.2/2.1.2.2", "C. 2.1.3.3/2.1.3.3", "D. 2.2.1.3/2.2.1.3"], ans: 0 },
+            { q: "Gas movement in/out of lungs:", options: ["A. Internal", "B. External", "C. Breathing", "D. Transport"], ans: 2 },
+            { q: "Oxygen transported in blood by:", options: ["A. Plasma", "B. WBC", "C. Hemoglobin", "D. Platelets"], ans: 2 },
+            { q: "Fusion of male/female gametes:", options: ["A. Fertilization", "B. Differentiation", "C. Growth", "D. Development"], ans: 0 },
+            { q: "Vitamin essential for bone growth:", options: ["A. Vitamin A", "B. Vitamin B", "C. Vitamin D", "D. Vitamin K"], ans: 2 },
+            { q: "Plant cells differ from animal cells in:", options: ["A. Mitochondria", "B. Cell wall", "C. Nucleus", "D. Cytoplasm"], ans: 1 },
+            { q: "Teeth for cutting and biting:", options: ["A. Incisors", "B. Canines", "C. Molars", "D. Premolars"], ans: 0 },
+            { q: "Breathing rate controlled by:", options: ["A. Heart", "B. Medulla oblongata", "C. Cerebellum", "D. Spinal cord"], ans: 1 },
+            { q: "Hormone regulating blood sugar:", options: ["A. Adrenaline", "B. Insulin", "C. Thyroxine", "D. Estrogen"], ans: 1 },
+            { q: "Cells becoming specialized:", options: ["A. Growth", "B. Differentiation", "C. Development", "D. Reproduction"], ans: 1 },
+            { q: "Role of skin in excretion is through:", options: ["A. Sweat glands", "B. Sebaceous", "C. Follicles", "D. Nails"], ans: 0 },
+            { q: "Most general classification category:", options: ["A. Family", "B. Class", "C. Kingdom", "D. Genus"], ans: 2 }
+        ]
+    };
+
+    let studentName = "", currentSub = "Use of English", currIdx = 0, timeLeft = 7200, timerId;
+    let selectedSubs = ["Use of English"], examData = {}, userAns = {};
+
+    const cbList = document.querySelectorAll('.subject-cb');
+    cbList.forEach(cb => cb.onchange = () => {
+        let count = document.querySelectorAll('.subject-cb:checked').length;
+        cbList.forEach(c => c.disabled = (count >= 3 && !c.checked));
+        document.getElementById('start-btn').disabled = (count !== 3);
+    });
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if(!studentName) return alert("Please enter your name");
+        cbList.forEach(c => { if(c.checked) selectedSubs.push(c.value); });
+        selectedSubs.forEach(s => { examData[s] = db[s]; userAns[s] = {}; });
+        
+        document.getElementById('page-register').classList.add('hidden');
+        document.getElementById('page-exam').classList.remove('hidden');
+        document.getElementById('cand-name-display').innerText = studentName;
+        
+        loadTabs();
+        switchSub("Use of English");
+        startTimer();
+    }
+
+    function loadTabs() {
+        const d = document.getElementById('subject-tabs');
+        d.innerHTML = selectedSubs.map(s => `<button class="tab ${s==currentSub?'active':''}" onclick="switchSub('${s}')">${s}</button>`).join('');
+    }
+
+    function switchSub(s) { currentSub = s; currIdx = 0; loadTabs(); updateView(); }
+
+    function updateView() {
+        const q = examData[currentSub][currIdx];
+        document.getElementById('q-label').innerText = `${currentSub} - Question ${currIdx+1}`;
+        document.getElementById('q-text').innerText = q.q;
+        document.getElementById('opt-list').innerHTML = q.options.map((o,i) => 
+            `<div class="option ${userAns[currentSub][currIdx]===i?'selected':''}" onclick="setAns(${i})">${o}</div>`).join('');
+        
+        document.getElementById('q-grid').innerHTML = examData[currentSub].map((_,i) => 
+            `<div class="grid-btn ${userAns[currentSub][i]!==undefined?'answered':''} ${i==currIdx?'active':''}" onclick="jump(${i})">${i+1}</div>`).join('');
+    }
+
+    function setAns(i) { userAns[currentSub][currIdx] = i; updateView(); }
+    function jump(i) { currIdx = i; updateView(); }
+    function nextQ() { if(currIdx < examData[currentSub].length-1) { currIdx++; updateView(); } }
+    function prevQ() { if(currIdx > 0) { currIdx--; updateView(); } }
+
+    function startTimer() {
+        timerId = setInterval(() => {
+            if(timeLeft <= 0) submitExam();
+            else {
+                timeLeft--;
+                let h=Math.floor(timeLeft/3600), m=Math.floor((timeLeft%3600)/60), s=timeLeft%60;
+                document.getElementById('time-display').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+        }, 1000);
+    }
+
+    function toggleCalc() { document.getElementById('calculator').classList.toggle('hidden'); }
+    let cStr = "";
+    function cInput(v) {
+        let d = document.getElementById('calc-display');
+        if(v=='C') cStr = ""; else if(v=='=') try { cStr = eval(cStr).toString(); } catch { cStr="Err"; } else cStr += v;
+        d.value = cStr || "0";
+    }
+
+    function submitExam() {
+        if(timeLeft > 0 && !confirm("Submit now?")) return;
+        clearInterval(timerId);
+        let scores = {}, total = 0;
+        selectedSubs.forEach(s => {
+            let correct = examData[s].filter((q,i) => userAns[s][i] === q.ans).length;
+            scores[s] = Math.round((correct / examData[s].length) * 100);
+            total += scores[s];
+        });
+        
+        let results = JSON.parse(localStorage.getItem('jResults') || "[]");
+        results.push({ name: studentName, scores, total, subs: selectedSubs });
+        localStorage.setItem('jResults', JSON.stringify(results));
+        
+        document.getElementById('page-exam').classList.add('hidden');
+        document.getElementById('page-result').classList.remove('hidden');
+        document.getElementById('res-score').innerText = total;
+        document.getElementById('res-breakdown').innerHTML = selectedSubs.map(s => `<b>${s}:</b> ${scores[s]}/100`).join('<br>');
+    }
+
+    function showAdmin() {
+        if(prompt("Password:") !== "L.T.U") return;
+        document.getElementById('page-register').classList.add('hidden');
+        document.getElementById('page-admin').classList.remove('hidden');
+        let data = JSON.parse(localStorage.getItem('jResults') || "[]");
+        document.getElementById('admin-tbody').innerHTML = data.map(r => {
+            let others = r.subs.filter(s => s != "Use of English");
+            return `<tr><td>${r.name}</td><td>${r.scores["Use of English"]}</td><td>${r.scores[others[0]]||0}</td><td>${r.scores[others[1]]||0}</td><td>${r.scores[others[2]]||0}</td><td><b>${r.total}</b></td></tr>`;
+        }).join('');
+    }
+</script>
+</body>
+</html>
